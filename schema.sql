@@ -1,29 +1,50 @@
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE CHECK (POSITION('@' IN email) > 1),
-    plan VARCHAR(50),
-    goal VARCHAR(50),
-    diet_type VARCHAR(50)
+
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT,
+    plan TEXT DEFAULT 'free',
+    goal TEXT,
+    diet_type TEXT,
+    daily_calories INTEGER DEFAULT 1800,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE meal_plans (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    week_start DATE,
-    plan_data JSONB
+CREATE TABLE IF NOT EXISTS meal_plan_templates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    diet_type TEXT NOT NULL,
+    goal TEXT NOT NULL,
+    day_number INTEGER,
+    breakfast JSONB,
+    lunch JSONB,
+    dinner JSONB,
+    snack JSONB,
+    total_calories INTEGER
 );
 
-CREATE TABLE nutrition_logs (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    date DATE NOT NULL,
-    meals JSONB,
-    calories INTEGER CHECK (calories >= 0)
+CREATE TABLE IF NOT EXISTS nutrition_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID,
+    meal_name TEXT,
+    calories INTEGER,
+    protein INTEGER DEFAULT 0,
+    carbs INTEGER DEFAULT 0,
+    fat INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE subscriptions (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    plan VARCHAR(50),
-    status VARCHAR(20) CHECK (status IN ('active', 'cancelled'))
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID,
+    plan TEXT,
+    status TEXT DEFAULT 'active',
+    expires_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS meal_plans (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID,
+    plan_data JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
 );
